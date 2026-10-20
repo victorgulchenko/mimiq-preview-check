@@ -1,0 +1,8 @@
+{
+  "name": "mimiq-preview-check",
+  "private": true,
+  "type": "module",
+  "description": "GitHub Action: simulated people go through your preview deploy and report where they got stuck.",
+  "scripts": { "test": "node --test test/index.test.mjs" },
+  "license": "MIT"
+}

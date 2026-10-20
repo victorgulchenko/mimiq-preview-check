@@ -1,0 +1,24 @@
+name: Self-test
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --test test/index.test.mjs
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          api-key: ${{ secrets.MIMIQ_API_KEY }}
+          url: https://www.mimiqai.com/demo/tallyloop/signup
+          goal: Sign up for a free trial and reach the welcome page
+          people: '1'
+          max-steps: '20'

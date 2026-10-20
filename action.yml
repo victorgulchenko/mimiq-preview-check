@@ -1,0 +1,82 @@
+name: Mimiq preview check
+description: Simulated people go through your preview deploy in a real browser and report where they got stuck, as a comment on the pull request.
+author: Mimiq
+branding:
+  icon: users
+  color: green
+inputs:
+  api-key:
+    description: Your Mimiq API key (mimiqai.com, Settings, "Create a key"). Store it as a secret. Without a key, a small free check runs (up to 3 people, daily limits apply).
+    required: false
+    default: ''
+  url:
+    description: The URL to test. Defaults to the preview URL of the deployment that triggered the workflow (deployment_status events from Vercel, Netlify, Cloudflare Pages and others).
+    required: false
+    default: ''
+  goal:
+    description: The task each simulated person tries, in plain words.
+    required: false
+    default: Sign up and start using it
+  audience:
+    description: Who the simulated people should be, e.g. "freelance designers" or "parents shopping for school shoes". If empty, Mimiq picks the likely audience from the page.
+    required: false
+    default: ''
+  people:
+    description: How many simulated people (1 to 10). Each uses 5 credits.
+    required: false
+    default: '3'
+  max-steps:
+    description: Step limit per person (10 to 60).
+    required: false
+    default: '25'
+  timeout-seconds:
+    description: How long to wait for the result (60 to 1800).
+    required: false
+    default: '1200'
+  comment:
+    description: Post (and keep updating) one comment on the pull request.
+    required: false
+    default: 'true'
+  fail-on:
+    description: When to fail the check. "never" (default), "gave-up" (anyone gave up), or "stuck" (anyone did not finish).
+    required: false
+    default: never
+  vercel-bypass-secret:
+    description: Optional Vercel "Protection Bypass for Automation" secret, for previews behind Vercel Deployment Protection. It is added to the URL that Mimiq opens.
+    required: false
+    default: ''
+  github-token:
+    description: Token used to find the pull request and post the comment.
+    required: false
+    default: ${{ github.token }}
+outputs:
+  report-url:
+    description: Link to the full report (with an API key).
+    value: ${{ steps.check.outputs.report-url }}
+  finished:
+    description: How many simulated people finished the task.
+    value: ${{ steps.check.outputs.finished }}
+  partway:
+    description: How many got partway.
+    value: ${{ steps.check.outputs.partway }}
+  gave-up:
+    description: How many gave up.
+    value: ${{ steps.check.outputs.gave-up }}
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      run: node "$GITHUB_ACTION_PATH/index.mjs"
+      env:
+        MIMIQ_API_KEY: ${{ inputs.api-key }}
+        MIMIQ_URL: ${{ inputs.url }}
+        MIMIQ_GOAL: ${{ inputs.goal }}
+        MIMIQ_AUDIENCE: ${{ inputs.audience }}
+        MIMIQ_PEOPLE: ${{ inputs.people }}
+        MIMIQ_MAX_STEPS: ${{ inputs.max-steps }}
+        MIMIQ_TIMEOUT: ${{ inputs.timeout-seconds }}
+        MIMIQ_COMMENT: ${{ inputs.comment }}
+        MIMIQ_FAIL_ON: ${{ inputs.fail-on }}
+        MIMIQ_VERCEL_BYPASS: ${{ inputs.vercel-bypass-secret }}
+        GITHUB_TOKEN_INPUT: ${{ inputs.github-token }}
