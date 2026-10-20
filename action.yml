@@ -1,5 +1,5 @@
 name: Mimiq preview check
-description: Simulated people go through your preview deploy in a real browser and report where they got stuck, as a comment on the pull request.
+description: Simulated people try each preview deploy in a real browser and comment on the PR where they got stuck.
 author: Mimiq
 branding:
   icon: users
