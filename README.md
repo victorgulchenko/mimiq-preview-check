@@ -79,3 +79,4 @@ Outputs: `report-url`, `finished`, `partway`, `gave-up`.
 ## License
 
 MIT
+
