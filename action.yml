@@ -42,7 +42,27 @@ inputs:
     required: false
     default: never
   vercel-bypass-secret:
-    description: Optional Vercel "Protection Bypass for Automation" secret, for previews behind Vercel Deployment Protection. It is added to the URL that Mimiq opens.
+    description: For previews behind Vercel Deployment Protection, your "Protection Bypass for Automation" secret. Sent to Mimiq for this run only, never put in the URL or shown in results.
+    required: false
+    default: ''
+  basic-auth-username:
+    description: For a preview behind a browser password prompt (basic auth), the username.
+    required: false
+    default: ''
+  basic-auth-password:
+    description: The basic-auth password. Store it as a secret.
+    required: false
+    default: ''
+  login-email:
+    description: To test pages behind a sign-in, the email or username of a test account the simulated people sign in with. Use a test account, not a real one.
+    required: false
+    default: ''
+  login-password:
+    description: The test account's password. Store it as a secret. The people type a placeholder; the real value is filled in only in the browser and never shown in results or reports.
+    required: false
+    default: ''
+  login-note:
+    description: Optional hint for signing in, e.g. "The sign-in link is in the top right."
     required: false
     default: ''
   github-token:
@@ -79,4 +99,9 @@ runs:
         MIMIQ_COMMENT: ${{ inputs.comment }}
         MIMIQ_FAIL_ON: ${{ inputs.fail-on }}
         MIMIQ_VERCEL_BYPASS: ${{ inputs.vercel-bypass-secret }}
+        MIMIQ_BASIC_USER: ${{ inputs.basic-auth-username }}
+        MIMIQ_BASIC_PASSWORD: ${{ inputs.basic-auth-password }}
+        MIMIQ_LOGIN_EMAIL: ${{ inputs.login-email }}
+        MIMIQ_LOGIN_PASSWORD: ${{ inputs.login-password }}
+        MIMIQ_LOGIN_NOTE: ${{ inputs.login-note }}
         GITHUB_TOKEN_INPUT: ${{ inputs.github-token }}

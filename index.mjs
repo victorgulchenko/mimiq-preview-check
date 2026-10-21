@@ -18,12 +18,15 @@ export function previewUrl(input, event) {
   return s.environment_url || s.target_url || event?.deployment?.payload?.web_url || '';
 }
 
-export function withVercelBypass(url, secret) {
-  if (!url || !secret) return url;
-  const u = new URL(url);
-  u.searchParams.set('x-vercel-protection-bypass', secret);
-  u.searchParams.set('x-vercel-set-bypass-cookie', 'true');
-  return u.toString();
+/** The access block for a protected preview or a test account (sealed by Mimiq, never in the URL). */
+export function accessFrom(get) {
+  const access = {};
+  if (get('MIMIQ_VERCEL_BYPASS')) access.vercel_bypass = get('MIMIQ_VERCEL_BYPASS');
+  if (get('MIMIQ_BASIC_USER') || get('MIMIQ_BASIC_PASSWORD')) access.basic_auth = { username: get('MIMIQ_BASIC_USER'), password: get('MIMIQ_BASIC_PASSWORD') };
+  if (get('MIMIQ_LOGIN_EMAIL') || get('MIMIQ_LOGIN_PASSWORD')) {
+    access.login = { email: get('MIMIQ_LOGIN_EMAIL'), password: get('MIMIQ_LOGIN_PASSWORD'), ...(get('MIMIQ_LOGIN_NOTE') ? { note: get('MIMIQ_LOGIN_NOTE') } : {}) };
+  }
+  return Object.keys(access).length ? access : null;
 }
 
 // The MCP server answers with an event stream (keep-alive pings, then one message) or plain JSON.
@@ -133,15 +136,17 @@ async function main() {
   const audience = env('MIMIQ_AUDIENCE');
   const baseUrl = previewUrl(env('MIMIQ_URL'), event);
   if (!baseUrl) throw new Error('No URL to test: set the url input, or run on deployment_status events from your host.');
-  const url = withVercelBypass(baseUrl, env('MIMIQ_VERCEL_BYPASS'));
+  const access = accessFrom((k) => env(k));
   const args = {
-    url, goal,
+    url: baseUrl, goal,
     count: clamp(env('MIMIQ_PEOPLE'), 1, 10, 3),
     max_steps: clamp(env('MIMIQ_MAX_STEPS'), 10, 60, 25),
     timeout_seconds: clamp(env('MIMIQ_TIMEOUT'), 60, 1800, 1200),
     ...(audience ? { audience } : {}),
+    ...(access ? { access } : {}),
   };
-  console.log(`Mimiq: ${args.count} simulated people try "${goal}" on ${baseUrl}`);
+  // Secrets are masked in the log by GitHub; never print the access block anyway.
+  console.log(`Mimiq: ${args.count} simulated people try "${goal}" on ${baseUrl}${access ? ` (with ${Object.keys(access).join(', ')})` : ''}`);
   let s = null; let error = '';
   try {
     const out = await runFlow({ apiKey: env('MIMIQ_API_KEY'), args });

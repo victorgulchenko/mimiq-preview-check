@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseMcpBody, resultOf, summarize, commentBody, previewUrl, withVercelBypass, runFlow } from '../index.mjs';
+import { parseMcpBody, resultOf, summarize, commentBody, previewUrl, accessFrom, runFlow } from '../index.mjs';
 
 const sse = readFileSync(new URL('./fixtures/flow.sse', import.meta.url), 'utf8');
 
@@ -39,12 +39,11 @@ test('the preview URL comes from deployment_status when no url is given', () => 
   assert.equal(previewUrl('https://given.example', {}), 'https://given.example');
 });
 
-test('the Vercel bypass is added as query parameters only when set', () => {
-  assert.equal(withVercelBypass('https://a.vercel.app/signup', ''), 'https://a.vercel.app/signup');
-  const u = new URL(withVercelBypass('https://a.vercel.app/signup?x=1', 's3cret'));
-  assert.equal(u.searchParams.get('x-vercel-protection-bypass'), 's3cret');
-  assert.equal(u.searchParams.get('x-vercel-set-bypass-cookie'), 'true');
-  assert.equal(u.searchParams.get('x'), '1');
+test('access goes in the access block, never in the URL', () => {
+  const env = { MIMIQ_VERCEL_BYPASS: 's3cret', MIMIQ_LOGIN_EMAIL: 'qa@acme.dev', MIMIQ_LOGIN_PASSWORD: 'pw', MIMIQ_LOGIN_NOTE: '' };
+  const access = accessFrom((k) => env[k] || '');
+  assert.deepEqual(access, { vercel_bypass: 's3cret', login: { email: 'qa@acme.dev', password: 'pw' } });
+  assert.equal(accessFrom(() => ''), null);
 });
 
 test('sends test_flow with the key as a bearer token, and none without a key', async () => {
