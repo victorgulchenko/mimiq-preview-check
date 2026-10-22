@@ -23,9 +23,21 @@ test('the comment says simulated, shows the counts and keeps one marker for upda
   const s = summarize(resultOf(parseMcpBody(sse)).data);
   const body = commentBody({ s, url: 'https://preview.example.com', goal: 'Sign up', audience: '' });
   assert.match(body, /<!-- mimiq-preview-check -->/);
-  assert.match(body, /\*\*1 of 1\*\* simulated people finished "Sign up"/);
-  assert.match(body, /not a conversion forecast/);
+  assert.match(body, /\*\*1 of 1\*\* agents finished "Sign up"/);
+  assert.match(body, /simulated users/);
+  assert.match(body, /do not forecast conversion/);
   assert.doesNotMatch(body, /[—–]/);
+});
+
+test('the comment lists what the browser caught, with how many agents hit each', () => {
+  const data = { counts: { converted: 1, engaged: 0, bounced: 2 }, sample_size: 3, personas: [],
+    browser_caught: [{ kind: 'http_error', text: 'POST /api/signup answered 500', agents: 3 }, { kind: 'slow', text: 'GET /api/plans took 4.2s', agents: 1 }] };
+  const s = summarize(data);
+  const body = commentBody({ s, url: 'https://preview.example.com', goal: 'Sign up', audience: '' });
+  assert.match(body, /\*\*What the browser caught\*\*/);
+  assert.match(body, /- `POST \/api\/signup answered 500` \(3 of 3 agents\)/);
+  assert.match(body, /- `GET \/api\/plans took 4.2s` \(1 of 3 agents\)/);
+  assert.doesNotMatch(body, /No agent reported a problem/);
 });
 
 test('an error still produces a comment that says what happened', () => {

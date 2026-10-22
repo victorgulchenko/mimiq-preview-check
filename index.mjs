@@ -62,7 +62,9 @@ export function summarize(data) {
       issues.push({ text: String(o), who: [p.name, p.occupation].filter(Boolean).join(', '), outcome: p.action_class || p.action });
     }
   }
-  return { finished, partway, gaveUp, total, issues: issues.slice(0, 6), reportUrl: data.report_url || data.results_url || '' };
+  // What the browser itself recorded on the site: errors, failed and slow requests (Mimiq MCP 0.5+).
+  const caught = (Array.isArray(data.browser_caught) ? data.browser_caught : []).filter(g => g && g.text).slice(0, 5);
+  return { finished, partway, gaveUp, total, issues: issues.slice(0, 6), caught, reportUrl: data.report_url || data.results_url || '' };
 }
 
 /** Out of credits: say it plainly, with the top-up and what happens next (the Chromatic pattern). */
@@ -76,21 +78,26 @@ export function commentBody({ s, url, goal, audience, error }) {
   } else if (error) {
     lines.push(`Mimiq could not run this check: ${error}`, '');
   } else {
-    lines.push(`**${s.finished} of ${s.total}** simulated people finished "${goal}" on ${url}` +
+    lines.push(`**${s.finished} of ${s.total}** agents finished "${goal}" on ${url}` +
       (s.partway || s.gaveUp ? ` (${s.partway} got partway, ${s.gaveUp} gave up).` : '.'));
     if (audience) lines.push(`Audience: ${audience}.`);
     lines.push('');
+    if (s.caught?.length) {
+      lines.push('**What the browser caught**', '');
+      for (const g of s.caught) lines.push(`- \`${g.text}\` (${g.agents} of ${s.total} ${s.total === 1 ? 'agent' : 'agents'})`);
+      lines.push('');
+    }
     if (s.issues.length) {
       lines.push('**Where they got stuck or hesitated**', '');
       for (const i of s.issues) lines.push(`- ${i.text}${i.who ? ` _(${i.who})_` : ''}`);
       lines.push('');
     } else {
-      lines.push('Nobody reported a problem on this run.', '');
+      if (!s.caught?.length) lines.push('No agent reported a problem on this run.', '');
     }
-    if (s.reportUrl) lines.push(`[Open the full report](${s.reportUrl}): each person's steps, screenshots and the issues ranked.`, '');
+    if (s.reportUrl) lines.push(`[Open the full report](${s.reportUrl}): each agent's steps, screenshots and the problems ranked.`, '');
   }
-  lines.push('<sub>The people are simulated: a fast usability check before real users, not a conversion forecast. ' +
-    'Runs by [Mimiq](https://www.mimiqai.com/mcp) on each preview deploy.</sub>');
+  lines.push('<sub>The agents are simulated users: they find what breaks and what confuses, they do not forecast conversion. ' +
+    'Runs by [Mimiq](https://www.mimiqai.com/github-actions) on each preview deploy.</sub>');
   return lines.join('\n');
 }
 
@@ -152,7 +159,7 @@ async function main() {
     ...(access ? { access } : {}),
   };
   // Secrets are masked in the log by GitHub; never print the access block anyway.
-  console.log(`Mimiq: ${args.count} simulated people try "${goal}" on ${baseUrl}${access ? ` (with ${Object.keys(access).join(', ')})` : ''}`);
+  console.log(`Mimiq: ${args.count} agents try "${goal}" on ${baseUrl}${access ? ` (with ${Object.keys(access).join(', ')})` : ''}`);
   let s = null; let error = '';
   try {
     const out = await runFlow({ apiKey: env('MIMIQ_API_KEY'), args });
@@ -178,8 +185,8 @@ async function main() {
   }
   const failOn = env('MIMIQ_FAIL_ON', 'never');
   if (error) { console.log(`::warning::Mimiq preview check did not run: ${error}`); return; }
-  if (failOn === 'gave-up' && s.gaveUp > 0) { console.log(`::error::${s.gaveUp} simulated people gave up.`); process.exitCode = 1; }
-  if (failOn === 'stuck' && s.finished < s.total) { console.log(`::error::${s.total - s.finished} of ${s.total} simulated people did not finish.`); process.exitCode = 1; }
+  if (failOn === 'gave-up' && s.gaveUp > 0) { console.log(`::error::${s.gaveUp} ${s.gaveUp === 1 ? 'agent' : 'agents'} gave up.`); process.exitCode = 1; }
+  if (failOn === 'stuck' && s.finished < s.total) { console.log(`::error::${s.total - s.finished} of ${s.total} agents did not finish.`); process.exitCode = 1; }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

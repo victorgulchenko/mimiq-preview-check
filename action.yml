@@ -1,12 +1,12 @@
 name: Mimiq preview check
-description: Simulated people try each preview deploy in a real browser and comment on the PR where they got stuck.
+description: AI agents use each preview deploy like your users and comment on the PR with what broke and where they got stuck.
 author: Mimiq
 branding:
   icon: users
   color: green
 inputs:
   api-key:
-    description: Your Mimiq API key (mimiqai.com, Settings, "Create a key"). Store it as a secret. Without a key, a small free check runs (up to 3 people, daily limits apply).
+    description: Your Mimiq API key (mimiqai.com, Settings, "Create a key"). Store it as a secret. Without a key, a small free check runs (up to 3 agents, daily limits apply).
     required: false
     default: ''
   url:
@@ -14,15 +14,15 @@ inputs:
     required: false
     default: ''
   goal:
-    description: The task each simulated person tries, in plain words.
+    description: The task each agent tries, in plain words.
     required: false
     default: Sign up and start using it
   audience:
-    description: Who the simulated people should be, e.g. "freelance designers" or "parents shopping for school shoes". If empty, Mimiq picks the likely audience from the page.
+    description: Who the agents act as, e.g. "freelance designers" or "parents shopping for school shoes". If empty, Mimiq picks the likely audience from the page.
     required: false
     default: ''
   people:
-    description: How many simulated people (1 to 10). Each uses 5 credits.
+    description: How many agents (1 to 10). Each uses 5 credits.
     required: false
     default: '3'
   max-steps:
@@ -54,11 +54,11 @@ inputs:
     required: false
     default: ''
   login-email:
-    description: To test pages behind a sign-in, the email or username of a test account the simulated people sign in with. Use a test account, not a real one.
+    description: To test pages behind a sign-in, the email or username of a test account the agents sign in with. Use a test account, not a real one.
     required: false
     default: ''
   login-password:
-    description: The test account's password. Store it as a secret. The people type a placeholder; the real value is filled in only in the browser and never shown in results or reports.
+    description: The test account's password. Store it as a secret. The agents type a placeholder; the real value is filled in only in the browser and never shown in results or reports.
     required: false
     default: ''
   login-note:
@@ -74,7 +74,7 @@ outputs:
     description: Link to the full report (with an API key).
     value: ${{ steps.check.outputs.report-url }}
   finished:
-    description: How many simulated people finished the task.
+    description: How many agents finished the task.
     value: ${{ steps.check.outputs.finished }}
   partway:
     description: How many got partway.
