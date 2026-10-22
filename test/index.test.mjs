@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseMcpBody, resultOf, summarize, commentBody, previewUrl, accessFrom, runFlow } from '../index.mjs';
+import { parseMcpBody, resultOf, summarize, commentBody, previewUrl, accessFrom, runFlow, OUT_OF_CREDITS } from '../index.mjs';
 
 const sse = readFileSync(new URL('./fixtures/flow.sse', import.meta.url), 'utf8');
 
@@ -54,4 +54,12 @@ test('sends test_flow with the key as a bearer token, and none without a key', a
   assert.equal(seen[0].headers.authorization, 'Bearer mq_sk_test');
   assert.equal(seen[1].headers.authorization, undefined);
   assert.equal(JSON.parse(seen[0].body).params.name, 'mimiq.test_flow');
+});
+
+
+test('out of credits: the comment says so plainly and links the top-up', () => {
+  const body = commentBody({ s: null, url: 'https://p.vercel.app', goal: 'Sign up', error: OUT_OF_CREDITS });
+  assert.match(body, /out of credits, so this preview was not checked/);
+  assert.match(body, /https:\/\/www\.mimiqai\.com\/app\/usage/);
+  assert.doesNotMatch(body, /could not run this check/);
 });

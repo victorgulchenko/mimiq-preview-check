@@ -65,9 +65,15 @@ export function summarize(data) {
   return { finished, partway, gaveUp, total, issues: issues.slice(0, 6), reportUrl: data.report_url || data.results_url || '' };
 }
 
+/** Out of credits: say it plainly, with the top-up and what happens next (the Chromatic pattern). */
+export const OUT_OF_CREDITS = 'Mimiq is out of credits, so this preview was not checked. ' +
+  'Top up from $9 (120 credits that never expire) or a plan from $19 a month at https://www.mimiqai.com/app/usage, and the next deploy is checked again.';
+
 export function commentBody({ s, url, goal, audience, error }) {
   const lines = [MARKER, '### Mimiq preview check', ''];
-  if (error) {
+  if (error === OUT_OF_CREDITS) {
+    lines.push(OUT_OF_CREDITS, '');
+  } else if (error) {
     lines.push(`Mimiq could not run this check: ${error}`, '');
   } else {
     lines.push(`**${s.finished} of ${s.total}** simulated people finished "${goal}" on ${url}` +
@@ -150,7 +156,7 @@ async function main() {
   let s = null; let error = '';
   try {
     const out = await runFlow({ apiKey: env('MIMIQ_API_KEY'), args });
-    if (out.isError) error = out.data?.message || out.text.slice(0, 400);
+    if (out.isError) error = out.data?.code === 'INSUFFICIENT_CREDITS' ? OUT_OF_CREDITS : (out.data?.message || out.text.slice(0, 400));
     else if (out.data?.status === 'audience_review') error = 'the recruited crowd did not match the audience; set the audience input more precisely.';
     else s = summarize(out.data);
     console.log(out.text);
