@@ -80,8 +80,8 @@ Use a test account with test data, not a real customer's account: the agents cli
 | `goal` | `Sign up and start using it` | The task each person tries, in plain words. |
 | `audience` | picked from the page | Who the agents act as, e.g. `parents shopping for school shoes`. |
 | `people` | `3` | 1 to 10 agents. Each uses 5 credits. |
-| `max-steps` | `25` | Step limit per person, 10 to 60. |
-| `timeout-seconds` | `1200` | How long to wait for the result. |
+| `max-steps` | empty | Optional step limit per agent, 10 to 200. Leave it empty and agents keep going until they finish the task or get stuck. |
+| `timeout-seconds` | `2400` | How long to wait for the result, 60 to 3600. |
 | `comment` | `true` | Keep one comment on the pull request up to date. |
 | `fail-on` | `never` | `gave-up` fails the check if anyone gave up; `stuck` if anyone did not finish. |
 | `vercel-bypass-secret` | none | For previews behind Vercel Deployment Protection: your "Protection Bypass for Automation" secret. |

@@ -26,13 +26,13 @@ inputs:
     required: false
     default: '3'
   max-steps:
-    description: Step limit per person (10 to 60).
+    description: Optional step limit per agent (10 to 200). Leave empty and agents keep going until they finish the task or get stuck.
     required: false
-    default: '25'
+    default: ''
   timeout-seconds:
-    description: How long to wait for the result (60 to 1800).
+    description: How long to wait for the result (60 to 3600).
     required: false
-    default: '1200'
+    default: '2400'
   comment:
     description: Post (and keep updating) one comment on the pull request.
     required: false
