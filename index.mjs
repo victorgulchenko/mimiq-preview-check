@@ -154,6 +154,7 @@ async function main() {
     url: baseUrl, goal,
     count: clamp(env('MIMIQ_PEOPLE'), 1, 10, 3),
     ...(env('MIMIQ_MAX_STEPS') ? { max_steps: clamp(env('MIMIQ_MAX_STEPS'), 10, 200, 100) } : {}),
+    ...(['phone', 'laptop'].includes(env('MIMIQ_DEVICES')) ? { devices: env('MIMIQ_DEVICES') } : {}),
     timeout_seconds: clamp(env('MIMIQ_TIMEOUT'), 60, 3600, 2400),
     ...(audience ? { audience } : {}),
     ...(access ? { access } : {}),

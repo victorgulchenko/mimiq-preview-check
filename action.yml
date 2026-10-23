@@ -29,6 +29,10 @@ inputs:
     description: Optional step limit per agent (10 to 200). Leave empty and agents keep going until they finish the task or get stuck.
     required: false
     default: ''
+  devices:
+    description: Which devices the agents use. mix (the default) puts about 4 in 10 on a phone-sized touch screen and the rest on a laptop; phone or laptop puts every agent on one.
+    required: false
+    default: 'mix'
   timeout-seconds:
     description: How long to wait for the result (60 to 3600).
     required: false
@@ -95,6 +99,7 @@ runs:
         MIMIQ_AUDIENCE: ${{ inputs.audience }}
         MIMIQ_PEOPLE: ${{ inputs.people }}
         MIMIQ_MAX_STEPS: ${{ inputs.max-steps }}
+        MIMIQ_DEVICES: ${{ inputs.devices }}
         MIMIQ_TIMEOUT: ${{ inputs.timeout-seconds }}
         MIMIQ_COMMENT: ${{ inputs.comment }}
         MIMIQ_FAIL_ON: ${{ inputs.fail-on }}

@@ -81,6 +81,7 @@ Use a test account with test data, not a real customer's account: the agents cli
 | `audience` | picked from the page | Who the agents act as, e.g. `parents shopping for school shoes`. |
 | `people` | `3` | 1 to 10 agents. Each uses 5 credits. |
 | `max-steps` | empty | Optional step limit per agent, 10 to 200. Leave it empty and agents keep going until they finish the task or get stuck. |
+| `devices` | `mix` | Which devices the agents use: `mix` (about 4 in 10 on a phone-sized touch screen), `phone` or `laptop`. |
 | `timeout-seconds` | `2400` | How long to wait for the result, 60 to 3600. |
 | `comment` | `true` | Keep one comment on the pull request up to date. |
 | `fail-on` | `never` | `gave-up` fails the check if anyone gave up; `stuck` if anyone did not finish. |
